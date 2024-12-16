@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMART RENAMER</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Ícone do site -->
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://brancocasa.vtexassets.com/arquivos/ids/160032/Papel-de-parede-degrade-azul-142.jpg?v=638150278442200000');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.9); /* Fundo branco com opacidade */
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-family: 'Roboto', sans-serif;
+            font-size: 40px;
+            color: #2A3D66;
+            font-weight: 700;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 16px;
+            color: #777;
+            margin-bottom: 10px;
+            display: block;
+            text-align: left;
+        }
+
+        input[type="file"], input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            margin: 12px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #f7f7f7;
+            color: #555;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="file"]:focus, input[type="text"]:focus {
+            border-color: #007BFF;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(1);
+        }
+
+        .alert {
+            background-color: #f44336;
+            color: white;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            display: none;
+            font-size: 16px;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .footer {
+            font-size: 14px;
+            color: #888;
+            margin-top: 20px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h1>SMART RENAMER</h1>
+
+        <div class="alert" id="alertBox"></div>
+
+        <label for="fileInput">Selecionar Arquivos:</label>
+        <input type="file" id="fileInput" multiple accept="*/*">
+
+        <label for="newFileName">Novo Nome Base (sem extensão):</label>
+        <input type="text" id="newFileName" placeholder="Digite o novo nome base">
+
+        <button onclick="downloadZip()">Gerar e Baixar ZIP</button>
+
+        <div class="footer">
+            <p>Desenvolvido por <strong>INFOTEC</strong></p>
+        </div>
+    </div>
+
+    <script>
+        function downloadZip() {
+            const fileInput = document.getElementById('fileInput');
+            const newFileName = document.getElementById('newFileName').value;
+            const alertBox = document.getElementById('alertBox');
+            
+            // Limpa a caixa de alerta antes de qualquer nova mensagem
+            alertBox.classList.remove('show');
+            
+            if (fileInput.files.length === 0) {
+                alertBox.textContent = 'Por favor, selecione arquivos.';
+                alertBox.classList.add('show');
+                return;
+            }
+
+            if (!newFileName) {
+                alertBox.textContent = 'Por favor, digite um novo nome base.';
+                alertBox.classList.add('show');
+                return;
+            }
+
+            const zip = new JSZip();
+            const files = fileInput.files;
+            const fileCount = files.length;
+
+            // Para cada arquivo, cria um novo nome e adiciona ao ZIP
+            Array.from(files).forEach((file, index) => {
+                const fileExtension = file.name.split('.').pop(); // Extensão do arquivo
+                const newFileNameWithExtension = `${newFileName}_${index + 1}.${fileExtension}`; // Nome base + extensão
+
+                // Adiciona o arquivo renomeado ao zip
+                zip.file(newFileNameWithExtension, file);
+            });
+
+            // Gera o arquivo ZIP e inicia o download
+            zip.generateAsync({ type: "blob" })
+                .then(function(content) {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(content);
+                    link.download = 'arquivos_renomeados.zip'; // Nome do arquivo ZIP
+                    link.click();
+                })
+                .catch(function(error) {
+                    alertBox.textContent = 'Ocorreu um erro ao gerar o arquivo ZIP. Tente novamente.';
+                    alertBox.classList.add('show');
+                    console.error(error);
+                });
+        }
+    </script>
+
+</body>
+</html>
